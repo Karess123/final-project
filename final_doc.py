@@ -125,7 +125,7 @@ def get_top_movie_links():
 
     movies = {}
     #info = movie_parent.find_all('a')
-    for movie in movie_parent[:100]:
+    for movie in movie_parent[:10]:
         info = movie.find('a')
         #print(info)
         movies[info.text] = 'https://www.imdb.com' + info['href']

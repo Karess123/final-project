@@ -9,10 +9,10 @@ def create_db():
 
     create_movies_sql = '''
         CREATE TABLE IF NOT EXISTS "movie_info"(
-            "Title" TEXT NOT NULL,
-            "Review_Score" INTEGER NOT NULL,
-            "Genre_Id" INTEGER NOT NULL,
-            "Rating" REAL NOT NULL,
+            "Title" TEXT,
+            "Review_Score" INTEGER,
+            "Genre_Id" INTEGER,
+            "Rating" REAL,
             FOREIGN KEY(Genre_Id) REFERENCES Genre(Id)
         )
         '''
@@ -39,25 +39,28 @@ def load_movies(movie_results):
 
     insert_movie_sql = '''
         INSERT INTO Movie_Info
-        Values (NULL, ?, ?, ?, ?, ?)
+        Values (?, ?, ?, ?)
     '''
 
     conn = sqlite3.connect('final_doc.sqlite3')
     cur = conn.cursor()
+    row_values = []
+    #print("movie_results", movie_results)
+    
     for row in movie_results:
-        #get genre id
-        cur.execute(select_genre_id, [row[2]])
-        res = cur.fetchone()
-        genre_Id = None
-        if res is not None: 
-            genre_Id = res[0]
-        pass    
-
+        row_values.append(row)
+    
+    cur.execute(select_genre_id, [row_values[2]])
+    res = cur.fetchone()
+    Genre_Id = None
+    if res is not None: 
+        Genre_Id = res[0]
+    print("row_values", row_values)
     cur.execute(insert_movie_sql, [
-        row[0], #title
-        row[1], #review_score
-        genre_Id,
-        row[4] #rating
+        row_values[0], #title
+        row_values[1], #review_score
+        Genre_Id,
+        row_values[3] #rating
     ])
     conn.commit()
     conn.close()
@@ -75,11 +78,14 @@ def load_genre():
     conn = sqlite3.connect('final_doc.sqlite3')
     cur = conn.cursor()
     for c in csv_reader:
-        cur.execute(insert_genre_sql,
-           c['Genre']
-        )
+        print(c)
+        cur.execute(insert_genre_sql, [
+           c[1]
+        ])
+    
     conn.commit()
     conn.close()
+
 
 #print(question())
 
@@ -90,3 +96,5 @@ if __name__ == "__main__":
     
     create_db()
     load_genre()
+    print("first movie results", movie_results)
+    load_movies(movie_results)
